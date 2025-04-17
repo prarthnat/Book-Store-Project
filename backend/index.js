@@ -1,40 +1,39 @@
-import express, { request, response } from "express";
-import { PORT, mongoDBURL } from "./config.js";
+import express from "express";
 import mongoose from "mongoose";
-import { Book } from "./models/bookModel.js";
-import booksRoute from "./routes/booksRoute.js";
 import cors from "cors";
+import dotenv from "dotenv";
+import booksRoute from "./routes/booksRoute.js";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 
-// Middleware for parsing request body
-app.use(express.json());
+// Use environment variables
+const PORT = process.env.PORT || 5500;
+const mongoDBURL = process.env.MONGODB_URL;
 
-// Middleware for handling CORS POLICY
-app.use(cors());
-// app.use(
-//   cors({
-//     origin: "https://localhost:3000",
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     allowedHeaders: ["Content-Type"],
-//   })
-// );
+// Middleware
+app.use(express.json()); // for parsing JSON
+app.use(cors()); // for enabling CORS
 
-app.get("/", (request, response) => {
-  console.log(request);
-  return response.status(234).send("Welcome to MERN Stack Book Shop");
+// Route for home
+app.get("/", (req, res) => {
+  res.status(200).send("Welcome to MERN Stack Book Shop");
 });
 
+// Routes
 app.use("/books", booksRoute);
 
+// Connect to MongoDB and start server
 mongoose
   .connect(mongoDBURL)
   .then(() => {
-    console.log("App connected to db");
+    console.log("Connected to MongoDB");
     app.listen(PORT, () => {
-      console.log(`App listening on port ${PORT}!`);
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.log(error);
+    console.error("MongoDB connection failed:", error);
   });
